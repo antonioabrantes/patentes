@@ -1,0 +1,19 @@
+inpi_depositos_mensal_2013_2018.csv
+depósitos de patentes segundo dados oficiais do INPI,por exemplo, para os dados de 2014 (para os demais anos basta trocar o ano na linha de endereço)
+http://www.inpi.gov.br/sobre/estatisticas/arquivos/estatisticas-preliminares/agregadas_depositos_decisoes_2014_atualizacao.xls
+
+inpi_concessoes_mensal_2013_2018.csv
+concessões de patentes segundo dados oficiais do INPI, por exemplo, para os dados de 2014 (para os demais anos basta trocar o ano na linha de endereço)
+http://www.inpi.gov.br/sobre/estatisticas/arquivos/estatisticas-preliminares/agregadas_depositos_decisoes_2014_atualizacao.xls
+
+wipo_br_patent_applications_1980_2017
+depósitos de patentes (incluindo pedidos PCT) segundo dados da OMPI
+https://www3.wipo.int/ipstats/index.htm?tab=patent
+(1 - Total patent Applications (direct and PCT national phase entries) / Total count by filing office, 1980/2017 Brazil
+
+us_patent_statistcs_chart_1963_2015.csv
+patentes e concessões de pedidos de patente no USPTo segundo dados do Patent Technology Monitoring Team (PTMT) do USPTO
+https://www.uspto.gov/web/offices/ac/ido/oeip/taf/us_stat.htm
+
+dados econômicos do Banco Mundial
+https://www.statsilk.com/maps/statplanet-world-bank-app-open-data/?y=1990-2015
