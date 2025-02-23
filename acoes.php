@@ -97,6 +97,7 @@
 
 <?php
 
+	if (empty($_REQUEST["ordem"])) {$ordem='datain desc';} else {$ordem=$_REQUEST["ordem"];}    
 	if (empty($_REQUEST["op"])) {$op=1;} else {$op=$_REQUEST["op"];}    
 	if (empty($_REQUEST["id"])) {$id=1;} else {$id=$_REQUEST["id"];}
 	if (empty($_REQUEST["tipo"])) {$tipo='todos';} else {$tipo=$_REQUEST["tipo"];}
@@ -123,6 +124,39 @@
 		$mensagem = "Ações CGREC";
 	}
 
+	if ($op==12)
+	{
+		$total=0;
+		$cmd = "SELECT * FROM `acoes` WHERE cgrec=1 and data_decisao is not null and id_justica=0;";
+		$res = mysqli_query($link,$cmd);
+		while ($line=@mysqli_fetch_assoc($res))
+		{
+			$id = $line['id'];
+			$numero = $line['numero'];
+			$processo = $line['processo'];
+			$data_decisao = $line['data_decisao'];
+			$kdata_decisao=strtotime($data_decisao);
+			$cmd2 = "select * from justica where documento like '%$processo%'"; // na tabela justica aparece assim: APELAÇÃO CÍVEL Nº 0210143-02.2017.4.02.5101/RJ
+			$res2 = mysqli_query($link,$cmd2);
+			if ($line2=@mysqli_fetch_assoc($res2)) 
+			{
+				$id_justica = $line2['id'];
+				$data_justica=$line2['data'];  // data da decisão judicial que deve ser sempre antes da data que o INPI publicou o 19.1/15.14 
+				$kdata_justica=strtotime($data_justica);
+				$dias = abs(round(($kdata_decisao-$kdata_justica)/60/60/24,0));
+				//echo "$numero $processo $data_decisao $data_justica ($dias)<BR>";
+				if ($kdata_decisao>$kdata_justica and $dias<180)
+				{
+					$cmd2 = "update acoes set id_justica=$id_justica where id=$id";
+					echo "$cmd2;<BR>";
+					$total++;
+				}
+			}
+		}
+		echo "Fim de processamento ($total)";
+		exit();
+		
+	}
 
 	if ($op==11)
 	{
@@ -1308,13 +1342,13 @@
 			$numero = $line['numero'];
 			$examinador = $line['examinador'];
 			$datain = $line['datain'];
-			if ($datain=='0000-00-00') 
+			if ($datain==null or $datain=='0000-00-00') 
 				$datain='-';
 			//else
 				//$datain = substr($datain,8,2).'/'.substr($datain,5,2).'/'.substr($datain,0,4);
 
 			$dataout = $line['dataout'];
-			if ($dataout=='0000-00-00') 
+			if ($dataout==null or $dataout=='0000-00-00') 
 				$dataout='-';
 			//else
 				//$dataout = substr($dataout,8,2).'/'.substr($dataout,5,2).'/'.substr($dataout,0,4);
@@ -1322,13 +1356,13 @@
 			$tipo = $line['tipo'];
 			$obs = $line['obs'];
 			$data_notifica = $line['data_notifica'];
-			if ($data_notifica=='0000-00-00')
+			if ($data_notifica==null or $data_notifica=='0000-00-00')
 				$data_notifica='-';
 			//else
 				//$data_notifica = substr($data_notifica,8,2).'/'.substr($data_notifica,5,2).'/'.substr($data_notifica,0,4);
 			
 			$data_decisao = $line['data_decisao'];
-			if ($data_decisao=='0000-00-00')
+			if ($data_decisao==null or $data_decisao=='0000-00-00')
 				$data_decisao='-';
 			//else
 				//$data_decisao = substr($data_decisao,8,2).'/'.substr($data_decisao,5,2).'/'.substr($data_decisao,0,4);
@@ -1587,17 +1621,107 @@
 
 			<thead>
 			<tr width=74%>
-				<th width=6%>Id</th>
-				<th width=12%>SEI</th>
-				<th width=8%>Processo</th>
-				<th width=8%>Número</th>
-				<th width=8%>Examinador</th>
-				<th width=6%>Entrada</th>
-				<th width=6%>Saída</th>
-				<th width=4%>Tipo</th>
+				<th width=6%>
+				<?php 
+					if ($ordem=='id desc')	
+						echo "<a href='acoes.php?ordem=id asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Id</a>";
+					elseif ($ordem=='id asc')	
+						echo "<a href='acoes.php?ordem=id desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Id</a>";
+					else
+						echo "<a href='acoes.php?ordem=id desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Id</a>";
+				?>
+				</th>
+				<th width=12%>
+				<?php 
+					if ($ordem=='sei desc')	
+						echo "<a href='acoes.php?ordem=sei asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>SEI</a>";
+					elseif ($ordem=='sei asc')	
+						echo "<a href='acoes.php?ordem=sei desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>SEI</a>";
+					else
+						echo "<a href='acoes.php?ordem=sei desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>SEI</a>";
+				?>
+				</th>
+				<th width=8%>
+				<?php 
+					if ($ordem=='processo desc')	
+						echo "<a href='acoes.php?ordem=processo asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Processo</a>";
+					elseif ($ordem=='processo asc')	
+						echo "<a href='acoes.php?ordem=processo desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Processo</a>";
+					else
+						echo "<a href='acoes.php?ordem=processo desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Processo</a>";
+				?>
+				</th>
+				<th width=8%>
+				<?php 
+					if ($ordem=='numero desc')	
+						echo "<a href='acoes.php?ordem=numero asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Número</a>";
+					elseif ($ordem=='numero asc')	
+						echo "<a href='acoes.php?ordem=numero desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Número</a>";
+					else
+						echo "<a href='acoes.php?ordem=numero desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Número</a>";
+				?>
+				</th>
+				<th width=8%>
+				<?php 
+					if ($ordem=='examinador desc')	
+						echo "<a href='acoes.php?ordem=examinador asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Examinador</a>";
+					elseif ($ordem=='examinador asc')	
+						echo "<a href='acoes.php?ordem=examinador desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Examinador</a>";
+					else
+						echo "<a href='acoes.php?ordem=examinador desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Examinador</a>";
+				?>
+				</th>
+				<th width=6%>
+				<?php 
+					if ($ordem=='datain desc')	
+						echo "<a href='acoes.php?ordem=datain asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Entrada</a>";
+					elseif ($ordem=='datain asc')	
+						echo "<a href='acoes.php?ordem=datain desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Entrada</a>";
+					else
+						echo "<a href='acoes.php?ordem=datain desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Entrada</a>";
+				?>
+				</th>
+				<th width=6%>
+				<?php 
+					if ($ordem=='dataout desc')	
+						echo "<a href='acoes.php?ordem=dataout asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Saída</a>";
+					elseif ($ordem=='dataout asc')	
+						echo "<a href='acoes.php?ordem=dataout desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Saída</a>";
+					else
+						echo "<a href='acoes.php?ordem=dataout desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Saída</a>";
+				?>
+				</th>
+				<th width=4%>
+				<?php 
+					if ($ordem=='tipo desc')	
+						echo "<a href='acoes.php?ordem=tipo asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Tipo</a>";
+					elseif ($ordem=='tipo asc')	
+						echo "<a href='acoes.php?ordem=tipo desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Tipo</a>";
+					else
+						echo "<a href='acoes.php?ordem=tipo desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>Tipo</a>";
+				?>
+				</td>
 				<th width=8%>Obs</th>
-				<th width=6%>15.23<BR>22.15</th>
-				<th width=6%>15.14<BR>19.1</th>
+				<th width=6%>
+				<?php 
+					if ($ordem=='data_notifica desc')	
+						echo "<a href='acoes.php?ordem=data_notifica asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.23<BR>22.15</a>";
+					elseif ($ordem=='data_notifica asc')	
+						echo "<a href='acoes.php?ordem=data_notifica desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.23<BR>22.15</a>";
+					else
+						echo "<a href='acoes.php?ordem=data_notifica desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.23<BR>22.15</a>";
+				?>
+				</th>
+				<th width=6%>
+				<?php 
+					if ($ordem=='data_decisao desc')	
+						echo "<a href='acoes.php?ordem=data_decisao asc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.14<BR>19.1</a>";
+					elseif ($ordem=='data_decisao asc')	
+						echo "<a href='acoes.php?ordem=data_decisao desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.14<BR>19.1</a>";
+					else
+						echo "<a href='acoes.php?ordem=data_decisao desc&tipo_data=$tipo_data&tipo=$tipo&pergunta=$pergunta'>15.14<BR>19.1</a>";
+				?>
+				</th>
 			</tr>
 			</thead>
 
@@ -1612,20 +1736,20 @@
 	{
 		if ($op=='novo')
 		{
-			$cmd = "select * from acoes where datain is null and cgrec=0 order by datain desc";
-			if ($pesquisar<>'') $cmd = "select * from acoes where datain is null and cgrec=0 and (processo like '%pesquisar%' or numero like '%pesquisar%') order by datain desc";
+			$cmd = "select * from acoes where datain is null and cgrec=0 order by $ordem";
+			if ($pesquisar<>'') $cmd = "select * from acoes where datain is null and cgrec=0 and (processo like '%pesquisar%' or numero like '%pesquisar%') order by $ordem";
 		}
 		else
 		{
 			if ($tipo=='todos')
 			{
-				$cmd = "select * from acoes where cgrec=0 order by datain desc";
-				if ($pesquisar<>'') $cmd = "select * from acoes where (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=0 order by datain desc";
+				$cmd = "select * from acoes where cgrec=0 order by $ordem";
+				if ($pesquisar<>'') $cmd = "select * from acoes where (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=0 order by $ordem";
 			}
 			else
 			{
-				$cmd = "select * from acoes where tipo='$tipo' and cgrec=0 order by datain desc";
-				if ($pesquisar<>'') $cmd = "select * from acoes where tipo='$tipo' and cgrec=0 and (processo like '%pesquisar%' or numero like '%pesquisar%') order by datain desc";
+				$cmd = "select * from acoes where tipo='$tipo' and cgrec=0 order by $ordem";
+				if ($pesquisar<>'') $cmd = "select * from acoes where tipo='$tipo' and cgrec=0 and (processo like '%pesquisar%' or numero like '%pesquisar%') order by $ordem";
 			}
 		}
 	}
@@ -1633,20 +1757,20 @@
 	{
 		if ($op=='novo')
 		{
-			$cmd = "select * from acoes where datain is null and cgrec=1 order by datain desc";
-			if ($pesquisar<>'') $cmd = "select * from acoes where datain is null and (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by datain desc";
+			$cmd = "select * from acoes where datain is null and cgrec=1 order by $ordem";
+			if ($pesquisar<>'') $cmd = "select * from acoes where datain is null and (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by $ordem";
 		}
 		else
 		{
 			if ($tipo=='todos')
 			{
-				$cmd = "select * from acoes where cgrec=1 order by datain desc";
-				if ($pesquisar<>'') $cmd = "select * from acoes where (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by datain desc";
+				$cmd = "select * from acoes where cgrec=1 order by $ordem";
+				if ($pesquisar<>'') $cmd = "select * from acoes where (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by $ordem";
 			}
 			else
 			{
-				$cmd = "select * from acoes where tipo='$tipo' and cgrec=1 order by datain desc";
-				if ($pesquisar<>'') $cmd = "select * from acoes where tipo='$tipo' and (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by datain desc";
+				$cmd = "select * from acoes where tipo='$tipo' and cgrec=1 order by $ordem";
+				if ($pesquisar<>'') $cmd = "select * from acoes where tipo='$tipo' and (processo like '%pesquisar%' or numero like '%pesquisar%') and cgrec=1 order by $ordem";
 			}
 		}
 	}
@@ -1663,13 +1787,14 @@
 		$datain = $line['datain'];
 		$divisao = $line['divisao'];
 		$codigo = $line['codigo'];
-		if ($datain=='0000-00-00') 
+		$id_justica = $line['id_justica'];
+		if ($datain==null or $datain=='0000-00-00') 
 			$datain='-';
 		//else
 			//$datain = substr($datain,8,2).'/'.substr($datain,5,2).'/'.substr($datain,0,4);
 
 		$dataout = $line['dataout'];
-		if ($dataout=='0000-00-00') 
+		if ($dataout==null or $dataout=='0000-00-00') 
 			$dataout='-';
 		//else
 			//$dataout = substr($dataout,8,2).'/'.substr($dataout,5,2).'/'.substr($dataout,0,4);
@@ -1677,13 +1802,13 @@
 		$tipo = $line['tipo'];
 		$obs = $line['obs'];
 		$data_notifica = $line['data_notifica'];
-		if ($data_notifica=='0000-00-00')
+		if ($data_notifica==null or $data_notifica=='0000-00-00')
 			$data_notifica='-';
 		//else
 			//$data_notifica = substr($data_notifica,8,2).'/'.substr($data_notifica,5,2).'/'.substr($data_notifica,0,4);
 		
 		$data_decisao = $line['data_decisao'];
-		if ($data_decisao=='0000-00-00')
+		if ($data_decisao==null or $data_decisao=='0000-00-00')
 			$data_decisao='-';
 		//else
 			//$data_decisao = substr($data_decisao,8,2).'/'.substr($data_decisao,5,2).'/'.substr($data_decisao,0,4);
@@ -1692,10 +1817,24 @@
 		//	if (substr($line['obs'],$i,1)==' ') break; // faz a quebra no primeiro espaço branco após o caracter 800, evitando interromper palavras
 		//$obs = substr($line['obs'],0,$i)."...";
 
-		$arquivo='';
-		$cmd2 = "select * from justica where documento like '%$processo%'";
-		$res2 = mysqli_query($link,$cmd2);
-		if ($line2=@mysqli_fetch_assoc($res2)) $arquivo = $line2['arquivo'];
+		$arquivo='';$reversao='';
+		if ($id_justica>0)
+		{
+			$cmd2 = "select * from justica where id=$id_justica";
+			$res2 = mysqli_query($link,$cmd2);
+			if ($line2=@mysqli_fetch_assoc($res2)) 
+			{
+				$arquivo = $line2['arquivo'];
+				$reversao = $line2['reversao'];
+			}
+		}
+		
+		if ($reversao=='sim') 
+			$corfundo_linha = "style='background-color: #FFDDDD;'";
+		elseif ($reversao=='não') 
+			$corfundo_linha = "style='background-color: #DDFFDD;'";
+		else
+			$corfundo_linha = "";
 		
 		echo "<tr class='table-light'>";
 		if ($op=='novo')
@@ -1707,14 +1846,10 @@
 		if ($arquivo=='')
 			echo "<td style='font-size: 12px;'> $processo </td>";
 		else
-		{
 			echo "<td style='font-size: 12px;'><a href='../plos/pesquisa2/$arquivo.pdf' target='_blank' STYLE='cursor:hand'> $processo</a> </td>";
-		}
-		// 
 
 		echo "<td style='font-size: 12px;'> $numero </td>";
 		echo "<td style='font-size: 12px;'> $examinador </td>";
-		echo "<td style='font-size: 12px;'>$dataout</td>";
 		if ($codigo==0)
 			echo "<td style='font-size: 12px;'>$datain</td>";
 		else
@@ -1722,8 +1857,28 @@
 		echo "<td style='font-size: 12px;'> $dataout </td>";
 		echo "<td style='font-size: 12px;'> $tipo </td>";
 		echo "<td style='font-size: 12px;'> $obs </td>";
-		echo "<td style='font-size: 12px;'> $data_notifica </td>";
-		echo "<td style='font-size: 12px;'> $data_decisao </td></tr>";
+		echo "<td style='font-size: 12px;'> $data_notifica</td>";
+		if ($reversao=='sim')
+		{
+			if ($id_justica>0)
+				echo "<td style='font-size: 12px; background-color: #DDFFDD;'><a href='http://cientistaspatentes.com.br/plos/juris.php?pesquisar_id=$id_justica' target='_blank'>$data_decisao</a></td></tr>";
+			else
+				echo "<td style='font-size: 12px;'>$data_decisao</td></tr>";
+		}
+		elseif ($reversao=='não')
+		{
+			if ($id_justica>0)
+				echo "<td style='font-size: 12px; background-color: #DDFFDD;'><a href='http://cientistaspatentes.com.br/plos/juris.php?pesquisar_id=$id_justica' target='_blank'>$data_decisao</a></td></tr>";
+			else
+				echo "<td style='font-size: 12px;'>$data_decisao</td></tr>";
+		}
+		else
+		{
+			if ($id_justica>0)
+				echo "<td style='font-size: 12px;'><a href='http://cientistaspatentes.com.br/plos/juris.php?pesquisar_id=$id_justica' target='_blank'>$data_decisao</a></td></tr>";
+			else
+				echo "<td style='font-size: 12px;'>$data_decisao</td></tr>";
+		}
 	}
     mysqli_close($link);
 ?>
