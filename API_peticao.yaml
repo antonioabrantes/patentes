@@ -1,0 +1,108 @@
+swagger: '2.0'
+host: cientistaspatentes.com.br
+schemes:
+  - https
+definitions:
+  ProcessoResponse:
+    type: object
+    properties:
+      numero:
+        description: Número do processo
+        type: string
+        example: '102014022058'
+      quantidade:
+        description: Quantidade total de petições encontradas
+        type: integer
+        example: 4
+      peticoes:
+        description: Lista de petições do processo
+        type: array
+        items:
+          $ref: '#/definitions/Peticao'
+  Peticao:
+    type: object
+    properties:
+      peticao:
+        description: Código identificador da petição
+        type: string
+        example: WBRJ 860140151493
+      tipo_peticao:
+        description: |
+          Código do tipo da petição:
+          - 200: Despacho de concessão
+          - 207: Despacho de arquivamento
+          - 210: Despacho de publicação
+          - 214: Despacho de exigência
+          - 260: Despacho de anuência
+          - 281: Despacho de recurso
+        type: integer
+        example: 200
+      data_peticao:
+        description: Data da petição no formato DD/MM/AAAA
+        type: string
+        example: 05/09/2014
+      cd_imagem:
+        description: Código da imagem/documento associado
+        type: string
+        example: '2891451'
+tags:
+  - name: Utilidades
+info:
+  title: API Peticao
+  description: >
+    API de serviços.
+
+
+    Esta API disponibiliza serviço de consulta as petições de um pedido de
+    patente.
+  version: 1.0.0
+paths:
+  /apiphp/endpoints/processo.php:
+    get:
+      tags:
+        - Utilidades
+      summary: Consultar Petição
+      description: >
+        Utilize esta operação quando o usuário solicitar as petições de um
+        número de pedido de patente.
+      operationId: consultarPeticao
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: numero
+          description: Número do pedido de patente (apenas números)
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Processo encontrado com suas petições
+          schema:
+            $ref: '#/definitions/ProcessoResponse'
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: Processo não encontrado
+        '500':
+          description: Erro no servidor
+      x-ms-openai-data:
+        openai-enabled: true
+        operations:
+          - operationId: consultarPeticao
+            x-ms-require-user-confirmation: false
+            summary: Consultar Petição
+            description: >
+              Utilize esta operação quando o usuário solicitar as petições de um
+              número de pedido de patente.
+x-ms-openai-manifest:
+  humanName: API Peticao
+  modelDescription: >
+    API de serviços.
+
+
+    Esta API disponibiliza serviço de consulta as petições de um pedido de
+    patente.
+  contactEmail: ''
+  legalUrl: ''
+security: []
+securityDefinitions: {}

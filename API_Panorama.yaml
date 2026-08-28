@@ -1,0 +1,140 @@
+swagger: '2.0'
+host: cientistaspatentes.com.br
+schemes:
+  - https
+definitions:
+  Endereco:
+    type: object
+    properties:
+      cep:
+        type: string
+      logradouro:
+        type: string
+      complemento:
+        type: string
+      bairro:
+        type: string
+      cidade:
+        type: string
+      uf:
+        type: string
+      estado:
+        type: string
+      regiao:
+        type: string
+      ibge:
+        type: string
+      ddd:
+        type: string
+tags:
+  - name: Utilidades
+  - name: Patentes
+  - name: Processos
+  - name: Classificações
+info:
+  title: API Panorama
+  description: >-
+    API de serviços do Sinergias para consulta de CEP, processos INPI, patentes
+    e classificações.
+  version: 1.0.0
+paths:
+  /apiphp/endpoints/cep.php:
+    get:
+      tags:
+        - Utilidades
+      summary: Consultar CEP
+      description: Consulta endereço a partir de um CEP brasileiro.
+      operationId: consultarCEP
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: cep
+          description: CEP com 8 dígitos
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Endereço encontrado
+          schema:
+            $ref: '#/definitions/Endereco'
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: CEP não encontrado
+        '500':
+          description: Erro no servidor
+  /apiphp/endpoints/processo.php:
+    get:
+      tags:
+        - Processos
+      summary: Consultar processo do INPI
+      description: Recupera informações de um processo do INPI.
+      operationId: consultarProcesso
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: numero
+          description: Número do processo
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Processo localizado
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: Processo não encontrado
+        '500':
+          description: Erro no servidor
+  /apiphp/endpoints/patente.php:
+    get:
+      tags:
+        - Patentes
+      summary: Consultar patente
+      description: Consulta um pedido de patente.
+      operationId: consultarPatente
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: pedido
+          description: Número do pedido
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Pedido localizado
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro no servidor
+  /apiphp/endpoints/ipc.php:
+    get:
+      tags:
+        - Classificações
+      summary: Consultar IPC
+      description: Consulta uma classificação IPC.
+      operationId: consultarIPC
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: codigo
+          description: Código IPC
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Classificação encontrada
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: Classificação não encontrada
+        '500':
+          description: Erro no servidor
+security: []
+securityDefinitions: {}

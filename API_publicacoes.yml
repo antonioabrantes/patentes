@@ -1,0 +1,110 @@
+swagger: '2.0'
+host: cientistaspatentes.com.br
+schemes:
+  - https
+definitions:
+  ProcessoResponse:
+    type: object
+    properties:
+      numero:
+        description: Número do pedido de patente
+        type: string
+        example: '102014022058'
+      quantidade:
+        description: Quantidade total de publicações encontradas
+        type: integer
+        example: 4
+      publicacoes:
+        description: Lista de publicações do pedido de patente
+        type: array
+        items:
+          $ref: '#/definitions/Publicacao'
+  Publicacao:
+    type: object
+    properties:
+      despacho:
+        description: Código identificador da publicação
+        type: string
+        example: '9.2'
+      despacho_descricao:
+        description: Descrição do Código identificador da publicação
+        type: string
+        example: Indeferimento
+      data:
+        description: Data da publicação do despacho no formato DD/MM/AAAA
+        type: string
+        example: '05/09/2014'
+      divisao:
+        description: Divisão 
+        type: string
+        example: dicel
+      anulado:
+        description: RPI que anulou o despacho (se existir)
+        type: string
+        example: 'despacho anulado na RPI 2809'
+      etapa:
+        description: etapa processual do despacho
+        type: integer
+        example: 2
+      sharepoint:
+        description: Link do documento no sharepoint
+        type: string
+        example: >-
+          https:\/\/inpigovbr.sharepoint.com\/Shared%20Documents\/pareceres\/102014022058_29409161937055000_207.pdf?web=1
+tags:
+  - name: Utilidades
+info:
+  title: API Publicacoes
+  description: >
+    API de serviços.
+
+
+    Esta API disponibiliza serviço de consulta as publicações de um pedido de patente.
+  version: 1.0.0
+paths:
+  /apiphp/endpoints/publica.php:
+    get:
+      tags:
+        - Utilidades
+      summary: Consultar Publicação
+      description: >
+        Utilize esta operação quando o usuário solicitar as publicações de um pedido de patente.
+      operationId: consultarPublicacao
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: numero
+          description: Número do pedido de patente
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Publicação encontrada
+          schema:
+            $ref: '#/definitions/ProcessoResponse'
+        '400':
+          description: Parâmetro inválido
+        '404':
+          description: Pedido de patente não encontrado
+        '500':
+          description: Erro no servidor
+      x-ms-openai-data:
+        openai-enabled: true
+        operations:
+          - operationId: consultarPublicacao
+            x-ms-require-user-confirmation: false
+            summary: Consultar Publicações
+            description: >
+              Utilize esta operação quando o usuário solicitar as publicações de um pedido de patente.
+x-ms-openai-manifest:
+  humanName: API Publicações
+  modelDescription: >
+    API de serviços.
+
+
+    Esta API disponibiliza serviço de consulta as publicações de um pedido de patente.
+  contactEmail: ''
+  legalUrl: ''
+security: []
+securityDefinitions: {}
